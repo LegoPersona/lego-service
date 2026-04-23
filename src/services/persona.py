@@ -26,7 +26,7 @@ def generate_instructions(ldr_file: str) -> Path:
 	tmp_dir = Path("/tmp") / str(job_id)
 	tmp_dir.mkdir(parents=True, exist_ok=True)
 
-	ldr_path = tmp_dir / "instructions.ldr"
+	ldr_path = tmp_dir / "model.ldr"
 	ldr_path.write_text(ldr_file, encoding="utf-8")
 
 	pdf_path = tmp_dir / "instructions.pdf"

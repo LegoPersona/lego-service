@@ -1,0 +1,6 @@
+FROM localhost/lego-service:latest
+COPY src/ src
+COPY templates/ templates
+COPY requirements.txt .
+RUN pip3 install -r requirements.txt
+CMD ["uvicorn", "src.index:app", "--host", "0.0.0.0", "--port", "8080"]

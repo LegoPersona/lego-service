@@ -2,7 +2,7 @@ from pathlib import Path
 import requests
 
 
-BASE_URL = "http://127.0.0.1:8080/persona"
+BASE_URL = "http://127.0.0.1:8004/persona"
 
 PERSONA_PAYLOAD = {
     "persona": {

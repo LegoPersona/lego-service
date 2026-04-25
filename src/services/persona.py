@@ -15,7 +15,7 @@ def combine_modules(persona: Persona) -> str:
 	combined += base_file.read_text(encoding="utf-8") + "\n"
 
 	for key, value in persona.model_dump().items():
-		file_path = TEMPLATE_ROOT / key / f"{value}.ldr"
+		file_path = TEMPLATE_ROOT / key / f"{value}"
 		combined += "0 STEP\n" + file_path.read_text(encoding="utf-8") + "\n"
 
 	return combined

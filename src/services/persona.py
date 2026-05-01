@@ -9,14 +9,13 @@ TEMPLATE_ROOT = Path(__file__).resolve().parents[2] / "templates"
 
 
 def combine_modules(persona: Persona) -> str:
-	combined = ""
-
-	base_file = TEMPLATE_ROOT / "head-base.ldr"
-	combined += base_file.read_text(encoding="utf-8") + "\n"
+	combined = (TEMPLATE_ROOT / "file-base.ldr").read_text(encoding="utf-8") + "\n"
 
 	for key, value in persona.model_dump().items():
 		file_path = TEMPLATE_ROOT / key / f"{value}"
 		combined += "0 STEP\n" + file_path.read_text(encoding="utf-8") + "\n"
+		if key == "shirt":
+			combined += "0 STEP\n" + (TEMPLATE_ROOT / "head-base.ldr").read_text(encoding="utf-8") + "\n"
 
 	return combined
 

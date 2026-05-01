@@ -6,13 +6,13 @@ BASE_URL = "http://127.0.0.1:8004/persona"
 
 PERSONA_PAYLOAD = {
     "persona": {
-        "beard": "no_beard",
-        "eyebrows": "black_round_eyebrows",
-        "eyes": "brown_eyes",
-        "hair": "bald_hair",
-        "nose": "round_nose",
         "pants": "blue_pants",
         "shirt": "red_shirt",
+        "beard": "no_beard",
+        "nose": "round_nose",
+        "eyes": "brown_eyes",
+        "eyebrows": "black_round_eyebrows",
+        "hair": "bald_hair",
     }
 }
 

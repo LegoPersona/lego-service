@@ -48,10 +48,29 @@ def test_instructions(ldr_file: str):
         print(f"[instructions] Error: {exc}")
 
 
+def test_image(ldr_file: str):
+    try:
+        response = requests.post(
+            f"{BASE_URL}/image",
+            json={"ldr_file": ldr_file},
+            timeout=60,
+        )
+        print(f"[image] Status: {response.status_code}")
+        if response.status_code == 200:
+            out_path = Path("model.png")
+            out_path.write_bytes(response.content)
+            print(f"PNG saved to {out_path}")
+        else:
+            print(response.text)
+    except requests.RequestException as exc:
+        print(f"[image] Error: {exc}")
+
+
 def main():
     ldr_file = test_generate()
     if ldr_file:
         test_instructions(ldr_file)
+        test_image(ldr_file)
 
 
 if __name__ == "__main__":

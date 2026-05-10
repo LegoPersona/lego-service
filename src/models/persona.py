@@ -1,11 +1,16 @@
 from pydantic import BaseModel
 
 
+class Module(BaseModel):
+    file_name: str
+    color: int
+
+
 class Persona(BaseModel):
-    pants: str
-    shirt: str
-    beard: str
-    nose: str
-    eyes: str
-    eyebrows: str
-    hair: str
+    pants: Module
+    shirt: Module
+    beard: Module
+    nose: Module
+    eyes: Module
+    eyebrows: Module
+    hair: Module

@@ -12,78 +12,90 @@ TEMPLATE_ROOT = Path(__file__).resolve().parents[2] / "templates"
 #   front 30° (slight right-diagonal), right 120° (right+back perspective),
 #   left -120° (symmetric mirror of right), back 210° (back+right perspective).
 DIRECTION_ROT = {
-    "front": (30,   30),
-    "right": (30,  120),
-    "left":  (30, -120),
-    "back":  (30,  210),
+	"front": (30,   30),
+	"right": (30,  120),
+	"left":  (30, -120),
+	"back":  (30,  210),
 }
 
 
 def _classify_direction(x: float, z: float) -> str:
-    abs_x, abs_z = abs(x), abs(z)
-    if abs_x < 15 and abs_z < 15:
-        return "front"
-    if abs_z >= abs_x:
-        return "front" if z <= 0 else "back"
-    return "left" if x < 0 else "right"
+	abs_x, abs_z = abs(x), abs(z)
+	if abs_x < 15 and abs_z < 15:
+		return "front"
+	if abs_z >= abs_x:
+		return "front" if z <= 0 else "back"
+	return "left" if x < 0 else "right"
 
 
 def _ldr_to_directional_steps(content: str) -> str:
-    """Emit parts in original order; insert a ROTSTEP+STEP boundary each time the
-    viewing direction changes so every part is visible without reordering."""
-    current_dir: str | None = None
-    pending: list[str] = []
-    result = ""
+	"""Emit parts in original order; insert a ROTSTEP+STEP boundary each time the
+	viewing direction changes so every part is visible without reordering."""
+	current_dir: str | None = None
+	pending: list[str] = []
+	result = ""
 
-    for line in content.splitlines():
-        stripped = line.strip()
-        if not stripped:
-            continue
-        tokens = stripped.split()
-        if tokens[0] != "1":
-            continue
-        x, z = float(tokens[2]), float(tokens[4])
-        direction = _classify_direction(x, z)
+	for line in content.splitlines():
+		stripped = line.strip()
+		if not stripped:
+			continue
+		tokens = stripped.split()
+		if tokens[0] != "1":
+			continue
+		x, z = float(tokens[2]), float(tokens[4])
+		direction = _classify_direction(x, z)
 
-        if direction != current_dir:
-            if pending:
-                x_tilt, y_spin = DIRECTION_ROT[current_dir]
-                for i in range(0, len(pending), 5):
-                    chunk = pending[i:i + 5]
-                    result += "\n".join(chunk) + "\n"
-                    result += f"0 ROTSTEP {x_tilt} {y_spin} 0 ABS\n"
-                    result += "0 STEP\n"
-                pending = []
-            current_dir = direction
+		if direction != current_dir:
+			if pending:
+				x_tilt, y_spin = DIRECTION_ROT[current_dir]
+				for i in range(0, len(pending), 5):
+					chunk = pending[i:i + 5]
+					result += "\n".join(chunk) + "\n"
+					result += f"0 ROTSTEP {x_tilt} {y_spin} 0 ABS\n"
+					result += "0 STEP\n"
+				pending = []
+			current_dir = direction
 
-        pending.append(line)
+		pending.append(line)
 
-    if pending and current_dir is not None:
-        x_tilt, y_spin = DIRECTION_ROT[current_dir]
-        for i in range(0, len(pending), 5):
-            chunk = pending[i:i + 5]
-            result += "\n".join(chunk) + "\n"
-            result += f"0 ROTSTEP {x_tilt} {y_spin} 0 ABS\n"
-            result += "0 STEP\n"
+	if pending and current_dir is not None:
+		x_tilt, y_spin = DIRECTION_ROT[current_dir]
+		for i in range(0, len(pending), 5):
+			chunk = pending[i:i + 5]
+			result += "\n".join(chunk) + "\n"
+			result += f"0 ROTSTEP {x_tilt} {y_spin} 0 ABS\n"
+			result += "0 STEP\n"
 
-    return result
+	return result
+
+
+def _apply_color(content: str, color: int) -> str:
+	lines = []
+	for line in content.splitlines():
+		words = line.split()
+		if len(words) >= 2 and words[1] == "0":
+			words[1] = str(color)
+			line = " ".join(words)
+		lines.append(line)
+	return "\n".join(lines)
 
 
 def combine_modules(persona: Persona) -> str:
-    combined = (TEMPLATE_ROOT / "file-base.ldr").read_text(encoding="utf-8") + "\n"
+	combined = (TEMPLATE_ROOT / "file-base.ldr").read_text(encoding="utf-8") + "\n"
 
-    for key, value in persona.model_dump().items():
-        file_path = TEMPLATE_ROOT / key / value
-        combined += _ldr_to_directional_steps(file_path.read_text(encoding="utf-8"))
-        if key == "shirt":
-            combined += _ldr_to_directional_steps(
-                (TEMPLATE_ROOT / "head-base.ldr").read_text(encoding="utf-8")
-            )
+	for key, module in persona:
+		file_path = TEMPLATE_ROOT / key / module.file_name
+		content = _apply_color(file_path.read_text(encoding="utf-8"), module.color)
+		combined += _ldr_to_directional_steps(content)
+		if key == "shirt":
+			combined += _ldr_to_directional_steps(
+				(TEMPLATE_ROOT / "head-base.ldr").read_text(encoding="utf-8")
+			)
 
-    combined += "0 ROTSTEP 30 30 0 ABS\n"
-    combined += "0 STEP\n"
+	combined += "0 ROTSTEP 30 30 0 ABS\n"
+	combined += "0 STEP\n"
 
-    return combined
+	return combined
 
 
 def generate_instructions(ldr_file: str) -> Path:

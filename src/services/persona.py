@@ -69,11 +69,11 @@ def _ldr_to_directional_steps(content: str) -> str:
 	return result
 
 
-def _apply_color(content: str, color: int) -> str:
+def _apply_color(content: str, color: int, replace: str) -> str:
 	lines = []
 	for line in content.splitlines():
 		words = line.split()
-		if len(words) >= 2 and words[1] == "0":
+		if len(words) >= 2 and words[1] == replace:
 			words[1] = str(color)
 			line = " ".join(words)
 		lines.append(line)
@@ -84,13 +84,16 @@ def combine_modules(persona: Persona) -> str:
 	combined = (TEMPLATE_ROOT / "file-base.ldr").read_text(encoding="utf-8") + "\n"
 
 	for key, module in persona:
-		file_path = TEMPLATE_ROOT / key / module.file_name
-		content = _apply_color(file_path.read_text(encoding="utf-8"), module.color)
-		combined += _ldr_to_directional_steps(content)
-		if key == "shirt":
-			combined += _ldr_to_directional_steps(
-				(TEMPLATE_ROOT / "head-base.ldr").read_text(encoding="utf-8")
-			)
+		if key != "skin_tone":
+			file_path = TEMPLATE_ROOT / key / module.file_name
+			content = _apply_color(file_path.read_text(encoding="utf-8"), module.color, replace="0")
+			combined += _ldr_to_directional_steps(content)
+			if key == "shirt":
+				combined += _ldr_to_directional_steps(
+					(TEMPLATE_ROOT / "head-base.ldr").read_text(encoding="utf-8")
+				)
+	
+	combined = _apply_color(combined, persona.skin_tone, replace="SKIN")
 
 	combined += "0 ROTSTEP 30 30 0 ABS\n"
 	combined += "0 STEP\n"

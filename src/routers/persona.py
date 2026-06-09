@@ -3,7 +3,7 @@ from fastapi.responses import FileResponse
 from src.models.requests import InstructionsRequest, PersonaRequest
 from src.models.persona import Persona
 import shutil
-from src.services.persona import combine_modules, generate_instructions, generate_image
+from src.services.persona import combine_modules, generate_instructions, generate_image, generate_parts_csv
 
 
 router = APIRouter(prefix="/persona", tags=["persona"])
@@ -31,4 +31,14 @@ def generate_image_route(request: InstructionsRequest, background_tasks: Backgro
         path=png_path,
         media_type="image/png",
         filename="model.png",
+    )
+
+@router.post("/csv")
+def generate_csv_route(request: InstructionsRequest, background_tasks: BackgroundTasks):
+    csv_path = generate_parts_csv(request.ldr_file)
+    background_tasks.add_task(shutil.rmtree, csv_path.parent)
+    return FileResponse(
+        path=csv_path,
+        media_type="text/csv",
+        filename="model-export.csv",
     )

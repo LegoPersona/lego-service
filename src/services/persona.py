@@ -159,3 +159,27 @@ def generate_image(ldr_file: str) -> Path:
 		raise RuntimeError("lpub3d24 produced no PNG output")
 	return pngs[-1]
 
+def generate_parts_csv(ldr_file: str) -> Path:
+	job_id = uuid.uuid4()
+	tmp_dir = Path("/tmp") / str(job_id)
+	tmp_dir.mkdir(parents=True, exist_ok=True)
+
+	ldr_path = tmp_dir / "model.ldr"
+	ldr_path.write_text(ldr_file, encoding="utf-8")
+
+	csv_path = tmp_dir / "model-export.csv"
+
+	cmd = [
+		"xvfb-run", "-a",
+		"env",
+		"QT_OPENGL=software",
+		"LIBGL_ALWAYS_SOFTWARE=1",
+		"lpub3d24",
+		"-pe",
+		"-o", "csv",
+		str(ldr_path),
+	]
+	subprocess.run(cmd, check=True)
+
+	return csv_path
+

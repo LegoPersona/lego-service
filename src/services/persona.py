@@ -88,7 +88,7 @@ def combine_modules(persona: Persona) -> str:
 			file_path = TEMPLATE_ROOT / key / module.file_name
 			content = _apply_color(file_path.read_text(encoding="utf-8"), module.color, replace="0")
 			combined += _ldr_to_directional_steps(content)
-			if key == "shirt":
+			if key == "beard":
 				combined += _ldr_to_directional_steps(
 					(TEMPLATE_ROOT / "head-base.ldr").read_text(encoding="utf-8")
 				)

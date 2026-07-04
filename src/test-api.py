@@ -12,6 +12,7 @@ PERSONA_PAYLOAD = {
         "nose": "round_nose",
         "eyes": "brown_eyes",
         "eyebrows": "black_round_eyebrows",
+        "glasses": "no_glasses",
         "hair": "bald_hair",
     }
 }

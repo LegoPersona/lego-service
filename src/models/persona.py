@@ -13,5 +13,6 @@ class Persona(BaseModel):
     nose: Module
     eyes: Module
     eyebrows: Module
+    glasses: Module
     hair: Module
     skin_tone: int

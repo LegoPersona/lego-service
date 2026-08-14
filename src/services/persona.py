@@ -87,6 +87,8 @@ def combine_modules(persona: Persona) -> str:
 		if key != "skin_tone":
 			file_path = TEMPLATE_ROOT / key / module.file_name
 			content = _apply_color(file_path.read_text(encoding="utf-8"), module.color, replace="0")
+			secondary_color = module.secondary_color if module.secondary_color is not None else module.color
+			content = _apply_color(content, secondary_color, replace="SECONDARY")
 			combined += _ldr_to_directional_steps(content)
 			if key == "beard":
 				combined += _ldr_to_directional_steps(

@@ -4,6 +4,7 @@ from pydantic import BaseModel
 class Module(BaseModel):
     file_name: str
     color: int
+    secondary_color: int | None = None
 
 
 class Persona(BaseModel):

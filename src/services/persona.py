@@ -3,9 +3,12 @@ import uuid
 from pathlib import Path
 
 from src.models.persona import Persona
+from src.storage import read_ldr
 
 
-TEMPLATE_ROOT = Path(__file__).resolve().parents[2] / "templates"
+# Fixed object keys for the shared base templates (no module document references them).
+TEMPLATE_BASE_KEY = "templates/file-base.ldr"
+HEAD_BASE_KEY = "templates/head-base.ldr"
 
 # (x_tilt, y_spin) for ROTSTEP x_tilt y_spin 0 ABS.
 # x_tilt=30 gives natural depth. Each y_spin has +30° added so no view is dead-flat:
@@ -81,20 +84,17 @@ def _apply_color(content: str, color: int, replace: str) -> str:
 
 
 def combine_modules(persona: Persona) -> str:
-	combined = (TEMPLATE_ROOT / "file-base.ldr").read_text(encoding="utf-8") + "\n"
+	combined = read_ldr(TEMPLATE_BASE_KEY) + "\n"
 
 	for key, module in persona:
 		if key != "skin_tone":
-			file_path = TEMPLATE_ROOT / key / module.file_name
-			content = _apply_color(file_path.read_text(encoding="utf-8"), module.color, replace="0")
+			content = _apply_color(read_ldr(module.ldr_key), module.color, replace="0")
 			secondary_color = module.secondary_color if module.secondary_color is not None else module.color
 			content = _apply_color(content, secondary_color, replace="SECONDARY")
 			combined += _ldr_to_directional_steps(content)
 			if key == "beard":
-				combined += _ldr_to_directional_steps(
-					(TEMPLATE_ROOT / "head-base.ldr").read_text(encoding="utf-8")
-				)
-	
+				combined += _ldr_to_directional_steps(read_ldr(HEAD_BASE_KEY))
+
 	combined = _apply_color(combined, persona.skin_tone, replace="SKIN")
 
 	combined += "0 ROTSTEP 30 30 0 ABS\n"

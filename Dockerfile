@@ -11,7 +11,6 @@ RUN xvfb-run -a env QT_OPENGL=software LIBGL_ALWAYS_SOFTWARE=1 \
     && rm -f /tmp/warmup.ldr /tmp/warmup_out.pdf \
     || echo "warmup done"
 COPY src/ src
-COPY templates/ templates
 COPY requirements.txt .
 RUN pip3 install -r requirements.txt
 EXPOSE 8004
